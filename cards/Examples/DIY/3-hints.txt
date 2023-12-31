@@ -1,0 +1,161 @@
+For step 1:
+Look in `game.interact`. There is a further hint down below.
+
+For step 2:
+Look at the different methods for the target.
+
+
+
+
+
+
+
+
+SPOILERS FURTHER DOWN. BE WARNED!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`game.interact.selectTarget` or `game.interact.selectCardTarget` is the method to use.
+(you can replace `game.interact.selectTarget` with `game.interact.selectCardTarget`, it is what i recommend in this situation)
+
+Make sure to set the `target` to the return value.
+
+Criterias to solve the card are the following:
+1. You NEED to use `game.interact.selectTarget`.
+2. When using `game.interact.selectTarget`, you need to set the following parameters:
+    a. `card` = self               // The caller is the diy card (`self`)
+    b. `forceSide` = null         // Don't force a side. The description says: Choose a minion. Not: Choose a FRIENDLY minion, or Choose an ENEMY minion.
+    c. `forceClass` = "minion"    // If using `selectTarget`. This Only allow minions to be targetted, the user isn't allowed to target the enemy hero, for example.
+    d. Don't set `flags`           // No special flags
+3. You need to have set the `target` variable, and it needs to be killed (no health and in the graveyard).

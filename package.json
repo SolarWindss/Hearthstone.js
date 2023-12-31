@@ -1,12 +1,20 @@
 {
   "name": "hearthstone.js",
-  "version": "1.6.2-stable",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.0-stable",
+  "description": "A console-based recreation of Hearthstone made in NodeJS",
+  "exports": "./index.ts",
+  "main": "./dist/index.js",
+  "type": "module",
   "scripts": {
-    "test": "npm run test:custom",
-    "test:custom": "node run-tests.js",
-    "generate": "node card_creator/vanilla/generator"
+    "start": "npm config set engine-strict true && node ./dist/index.js",
+    "test": "npm run cardtest && xo && npm run script:crashtest > .ignore.crashlog.txt",
+    "cardtest": "npm run script:testcards",
+    "script:vanilla:generate": "node ./dist/scripts/vanilla/generate",
+    "script:vanilla:generate-no-filter": "node ./dist/scripts/vanilla/generate --no-filter",
+    "script:vanilla:propfinder": "node ./dist/scripts/vanilla/propfinder",
+    "script:crashtest": "node ./dist/scripts/crashtest",
+    "script:idscript": "node ./dist/scripts/id/main",
+    "script:testcards": "node ./dist/scripts/testcards"
   },
   "repository": {
     "type": "git",
@@ -15,17 +23,72 @@
   "author": "LunarTides",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "axios": "^1.4.0",
-    "colors": "^1.4.0",
+    "chalk": "^5.3.0",
+    "date-and-time": "^3.0.3",
     "deckstrings": "^3.1.1",
+    "lodash": "^4.17.21",
     "readline-sync": "^1.4.10",
-    "uuid": "^9.0.0"
+    "strip-ansi": "^7.1.0"
   },
   "devDependencies": {
-    "mocha": "^10.2.0"
+    "@hearthstonejs/vanillatypes": "^3.0.1",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.10.6",
+    "@types/readline-sync": "^1.4.8",
+    "generate-changelog": "^1.8.0",
+    "typescript": "^5.3.3",
+    "xo": "^0.56.0"
   },
   "engines": {
     "node": ">=15.0.0",
     "npm": ">=7.0.0"
+  },
+  "xo": {
+    "space": 4,
+    "rules": {
+      "unicorn/no-process-exit": "off",
+      "max-params": "off",
+      "no-warning-comments": "off",
+      "no-unused-vars": "error",
+      "require-jsdoc": "error",
+      "@typescript-eslint/object-curly-spacing": [
+        "error",
+        "always"
+      ],
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "default",
+          "format": [
+            "camelCase"
+          ],
+          "leadingUnderscore": "allow"
+        },
+        {
+          "selector": "typeLike",
+          "format": [
+            "PascalCase"
+          ]
+        },
+        {
+          "selector": "objectLiteralProperty",
+          "format": null
+        },
+        {
+          "selector": "objectLiteralMethod",
+          "format": null,
+          "leadingUnderscore": "allow"
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "files": "cards/**",
+        "rules": {
+          "no-unused-vars": "off",
+          "require-jsdoc": "off"
+        }
+      }
+    ]
   }
 }
