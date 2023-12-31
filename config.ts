@@ -3,7 +3,7 @@ import { type GameConfig } from '@Game/types.js';
 export const config: GameConfig = {
     general: {
         // Debug mode enables debug commands, and hides redundant information.
-        debug: true,
+        debug: false,
 
         // The editor that gets launched.
         editor: 'code',
