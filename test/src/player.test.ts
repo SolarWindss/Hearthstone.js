@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { createGame } from "@Game/game.js";
 import { Player } from "@Game/player.js";
-
-/*
- * Need to create a game in case the functions need it
- * This is a pretty big performance hit.
- */
-await createGame();
+import {
+	Ability,
+	Event,
+	EventListenerMessage,
+	GamePlayCardReturn,
+} from "@Game/types.js";
+import { Card } from "@Game/card.js";
 
 describe("src/player", () => {
 	test("fromID - static", async () => {
@@ -94,16 +94,74 @@ describe("src/player", () => {
 		expect(player.emptyMana).toBe(7);
 	});
 
-	test.todo("addOverload", async () => {
-		expect(false).toEqual(true);
+	test("addOverload", async () => {
+		const player = new Player();
+
+		game.event.addListener(Event.GainOverload, async (value, eventPlayer) => {
+			expect(eventPlayer).toBe(player);
+			expect(value).toBe(1);
+			return EventListenerMessage.Destroy;
+		});
+
+		expect(player.overload).toBe(0);
+		player.addOverload(1);
+
+		expect(player.overload).toBe(1);
 	});
 
-	test.todo("setWeapon", async () => {
-		expect(false).toEqual(true);
+	test("setWeapon", async () => {
+		const player = new Player();
+
+		let deathrattleTriggered = false;
+
+		expect(player.weapon).toBeUndefined();
+
+		const weapon = await Card.create(game.cardIds.wickedKnife22, player);
+		weapon.addAbility(Ability.Deathrattle, async (owner, self) => {
+			deathrattleTriggered = true;
+		});
+
+		expect(await player.setWeapon(weapon)).toBe(true);
+
+		expect(player.weapon).not.toBeUndefined();
+		expect(player.attack).toBe(weapon.attack ?? 0);
+
+		expect(deathrattleTriggered).toBe(false);
+
+		const weapon2 = await weapon.imperfectCopy();
+		weapon2.attack = 5;
+
+		expect(await player.setWeapon(weapon2)).toBe(true);
+
+		expect(player.weapon).not.toBeUndefined();
+		expect(player.attack).toBe(5);
+
+		expect(deathrattleTriggered).toBe(true);
 	});
 
-	test.todo("destroyWeapon", async () => {
-		expect(false).toEqual(true);
+	test("destroyWeapon", async () => {
+		const player = new Player();
+
+		let deathrattleTriggered = false;
+
+		expect(player.weapon).toBeUndefined();
+		expect(await player.destroyWeapon()).toBe(false);
+
+		const weapon = await Card.create(game.cardIds.wickedKnife22, player);
+		weapon.addAbility(Ability.Deathrattle, async (owner, self) => {
+			deathrattleTriggered = true;
+		});
+
+		expect(await player.setWeapon(weapon)).toBe(true);
+
+		expect(player.weapon).not.toBeUndefined();
+		expect(player.attack).toBe(weapon.attack ?? 0);
+
+		expect(await player.destroyWeapon()).toBe(true);
+		expect(player.weapon).toBeUndefined();
+		expect(player.attack).toBe(0);
+
+		expect(deathrattleTriggered).toBe(true);
 	});
 
 	test("addArmor", async () => {
@@ -121,16 +179,89 @@ describe("src/player", () => {
 		expect(player.armor).toBe(105);
 	});
 
-	test.todo("addAttack", async () => {
-		expect(false).toEqual(true);
+	test("addAttack", async () => {
+		const player = new Player();
+
+		game.event.addListener(Event.GainHeroAttack, async (value, eventPlayer) => {
+			expect(eventPlayer).toBe(player);
+			expect(value).toBe(1);
+			return EventListenerMessage.Destroy;
+		});
+
+		expect(player.attack).toBe(0);
+		player.addAttack(1);
+
+		expect(player.attack).toBe(1);
 	});
 
-	test.todo("addHealth", async () => {
-		expect(false).toEqual(true);
+	test("addHealth", async () => {
+		const player = new Player();
+
+		expect(player.health).toBe(player.maxHealth);
+		player.addHealth(1);
+
+		expect(player.health).toBe(player.maxHealth);
+
+		player.health = player.maxHealth - 10;
+		player.addHealth(1);
+		expect(player.health).toBe(player.maxHealth - 10 + 1);
 	});
 
-	test.todo("remHealth", async () => {
-		expect(false).toEqual(true);
+	test("remHealth", async () => {
+		const player = new Player();
+		let times = 0;
+		let fatalDamageTriggered = false;
+
+		const destroy = game.event.addListener(
+			Event.TakeDamage,
+			async (value, eventPlayer) => {
+				expect(value).toBe(1);
+				times++;
+				return EventListenerMessage.Success;
+			},
+			-1,
+		);
+
+		game.event.addListener(Event.FatalDamage, async (value, eventPlayer) => {
+			expect(value).toBeUndefined();
+			fatalDamageTriggered = true;
+			player.health = 1;
+			return EventListenerMessage.Destroy;
+		});
+
+		expect(player.health).toBe(player.maxHealth);
+		expect(player.armor).toBe(0);
+		expect(await player.remHealth(1)).toBe(true);
+
+		expect(player.health).toBe(player.maxHealth - 1);
+		// TODO: This fails for some reason.
+		expect(times).toBe(1);
+
+		player.armor = 5;
+		expect(await player.remHealth(3)).toBe(true);
+
+		expect(player.health).toBe(player.maxHealth - 1);
+		expect(player.armor).toBe(2);
+		expect(times).toBe(1);
+
+		expect(await player.remHealth(3)).toBe(true);
+
+		expect(player.health).toBe(player.maxHealth - 2);
+		expect(player.armor).toBe(0);
+		expect(times).toBe(2);
+
+		expect(await player.remHealth(9999)).toBe(true);
+		expect(player.health).toBe(1);
+		expect(times).toBe(3);
+		expect(fatalDamageTriggered).toBe(true);
+
+		player.health = player.maxHealth;
+		player.immune = true;
+
+		expect(await player.remHealth(1)).toBe(true);
+		expect(player.health).toBe(player.maxHealth);
+
+		destroy();
 	});
 
 	test.todo("shuffleDeck", async () => {

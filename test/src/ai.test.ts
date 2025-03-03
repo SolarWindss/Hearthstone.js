@@ -1,12 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Ai } from "@Game/ai.js";
 
-/*
- * Need to create a game in case the functions need it
- * This is a pretty big performance hit.
- */
-// createGame();
-
 describe("src/ai", () => {
 	test.todo("calcMove", async () => {
 		expect(false).toEqual(true);
