@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { Game } from "@Game/game.js";
+import { createGame } from "@Game/game.js";
 
 /*
  * Need to create a game in case the functions need it
  * This is a pretty big performance hit.
  */
-// createGame();
+await createGame();
 
 describe("src/game", () => {
 	test.todo("input", async () => {

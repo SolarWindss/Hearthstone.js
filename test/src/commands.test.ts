@@ -1,12 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { commands } from "@Game/commands.js";
 
-/*
- * Need to create a game in case the functions need it
- * This is a pretty big performance hit.
- */
-// createGame();
-
 describe("src/commands", () => {
 	test.todo("end", async () => {
 		expect(false).toEqual(true);
