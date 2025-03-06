@@ -1,12 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { Player } from "@Game/player.js";
-import {
-	Ability,
-	Event,
-	EventListenerMessage,
-	GamePlayCardReturn,
-} from "@Game/types.js";
 import { Card } from "@Game/card.js";
+import { Player } from "@Game/player.js";
+import { Ability, Event, EventListenerMessage } from "@Game/types.js";
 
 describe("src/player", () => {
 	test("fromID - static", async () => {
